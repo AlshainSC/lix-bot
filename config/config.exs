@@ -1,10 +1,10 @@
 import Config
 
 config :src, Lix.Repo,
-  database: "lix_twitch",
-  username: "alshain",
-  password: "",
-  hostname: "127.0.0.1"
+  database: System.get_env("DATABASE_NAME"), 
+  username: System.get_env("USERNAME"),
+  password: System.get_env("PASSWORD"),
+  hostname: System.get_env("HOSTNAME") 
 
 config :src, ecto_repos: [Lix.Repo]
 

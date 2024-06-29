@@ -20,9 +20,6 @@ defmodule Lix.Bot do
   alias Lix.Repo
   #alias Lix.Twitch
 
-  #@channel_id "#{System.get_env("TEST_CHANNEL_ID")}"
-  @channel_id "978163097938317326"
-  
   def start_link([]) do
     try do
       Consumer.start_link(__MODULE__)
