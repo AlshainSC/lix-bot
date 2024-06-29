@@ -5,7 +5,8 @@ defmodule Src.Application do
     # Lix.Supervisor.start_link
     children = [
         Lix.Repo,
-        Lix.Bot
+        Lix.Bot,
+        {Finch, name: Lix.Finch}
       ]
     opts = [strategy: :one_for_one, name: Src.Supervisor]
     Supervisor.start_link(children, opts)

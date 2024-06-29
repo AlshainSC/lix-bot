@@ -1,8 +1,8 @@
-defmodule Lix.Repo.Migrations.CreateUsernames do
+defmodule Lix.Repo.Migrations.ChangeTableName do
   use Ecto.Migration
 
   def change do
-    create table(:usernames) do
+    create table(:username) do
       add :username, :string
     end
   end

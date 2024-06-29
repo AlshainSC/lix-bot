@@ -1,24 +1,10 @@
-# defmodule Lix.Supervisor do
-#   use Supervisor
-
-#   def start_link() do
-#     Supervisor.start_link(__MODULE__, :ok)
-#   end
-
-#   @impl true
-#   def init(_init_arg) do
-#     children = [
-#       Lix.Bot
-#     ]
-#     Supervisor.init(children, strategy: :one_for_one, name: Lix.Bot)
-#   end
-# end
 
 defmodule Lix.Bot do
   use Nostrum.Consumer
 
+  alias Lix.Twitch
   alias Lix.Repo
-  #alias Lix.Twitch
+  @channel_id "904126564701200427"
 
   def start_link([]) do
     try do
@@ -30,13 +16,7 @@ defmodule Lix.Bot do
   end
 
   def handle_event({:MESSAGE_CREATE, message, _ws_state}) do
-    # cond do
-    #   String.starts_with?(message.content, "!track") ->
-    #     track_username(message)
-    #   true ->
-    #     :ignore
-    # end
-    IO.inspect(message, label: "received message")
+   IO.inspect(message, label: "received message")
     unless message.author.bot do
       spawn fn ->
         Lix.Commands.parse_command(message)
@@ -44,25 +24,24 @@ defmodule Lix.Bot do
     end
   end
 
+  def poll_twitch() do
+    users = Repo.get_all_usernames()
+
+    users
+    |> Enum.chunk_every(100)
+    |> Task.async_stream(&Twitch.get_streams/1)
+    |> Enum.flat_map(fn {:ok, streams} -> streams end)
+    |> Enum.each(fn stream ->
+      if stream["type"] == "live" do
+        user = Repo.get_username(stream["user_name"])
+        if user do
+          Nostrum.Api.create_message(@channel_id, "#{user.username} has gone live on Twitch! https://twitch.tv/#{user.username}")
+        end
+      end
+    end)
+  end
+
   def handle_event(_event) do
     :noop
   end
-
-  # defp track_username(message) do
-  #   username = String.trim_leading(message.content, "!track")
-
-  #   if Repo.get_username(username) do
-  #     Nostrum.Api.create_message(@channel_id, "Username #{username} is already being tracked!")
-  #   else
-  #     Repo.track_username(username)
-  #     Nostrum.Api.create_message(@channel_id, "Now tracking Twitch user: #{username}!")
-  #   end 
-  # end
-
-
-
-  # def poll_twitch() do
-  #   usernames = Repo.get_all_usernames()
-
-  # end
 end
